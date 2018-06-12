@@ -1,5 +1,7 @@
 using GalaSoft.MvvmLight.Ioc;
 using CommonServiceLocator;
+using RainSimulationWpf.View.Services;
+using RainSimulationWpf.ViewModel.Services;
 
 namespace RainSimulationWpf.ViewModel
 {
@@ -16,9 +18,11 @@ namespace RainSimulationWpf.ViewModel
         {
             ServiceLocator.SetLocatorProvider(() => SimpleIoc.Default);
 
-            SimpleIoc.Default.Register<MainViewModel>();
-        }
+	        SimpleIoc.Default.Register<IFileDialogService>(() => new FileDialogService());
 
+			SimpleIoc.Default.Register<MainViewModel>();
+        }
+		
         public MainViewModel Main => ServiceLocator.Current.GetInstance<MainViewModel>();
         
         public static void Cleanup()

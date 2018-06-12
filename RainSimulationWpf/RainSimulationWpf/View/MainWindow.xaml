@@ -4,12 +4,25 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:RainSimulationWpf.View"
-        xmlns:rain="clr-namespace:RainSimulationWpf.Rain"
         mc:Ignorable="d"        
         Title="MainWindow" Height="350" Width="525"
         DataContext="{Binding Main, Source={StaticResource Locator}}" >
 
-    
-    <local:SimulationSurfaceView />
+    <Window.InputBindings>
+        <KeyBinding Key="O" Modifiers="Control" Command="{Binding OpenMapCommand, Mode=OneTime}" />
+    </Window.InputBindings>
 
+    <DockPanel>
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_File">
+                <MenuItem 
+                    Header="_Open" 
+                    InputGestureText="Ctrl+O"
+                    Command="{Binding OpenMapCommand, Mode=OneTime}">
+                </MenuItem>
+            </MenuItem>
+        </Menu>
+
+        <local:SimulationSurfaceView />
+    </DockPanel>
 </Window>

@@ -1,4 +1,6 @@
-﻿namespace RainSimulationWpf.Rain
+﻿using System;
+
+namespace RainSimulationWpf.Rain
 {
     internal class LandRegion
     {
@@ -13,7 +15,24 @@
 
         public double Water { get; set; }
 
-        public double Overflow { get; set; }
+	    public double GetWaterLevel()
+	    {
+		    return (Height < 0) 
+			    ? 0 
+			    : Height + Water;
+	    }
+
+	    public void Add(double water)
+	    {
+		    Water += (Height < 0)
+			    ? 0
+			    : water;
+	    }
+
+	    public void Take(double water)
+	    {
+		    Water = Math.Max(0, Water - water);
+	    }
 
         #endregion
     }

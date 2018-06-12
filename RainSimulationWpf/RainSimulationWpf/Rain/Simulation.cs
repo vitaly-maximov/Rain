@@ -10,36 +10,37 @@ namespace RainSimulationWpf.Rain
     {
         #region fields
 
+		private readonly LandRegion _outsideRegion = new LandRegion(-1);
+
         private readonly Random _random = new Random();
         private readonly HashSet<Drop> _drops = new HashSet<Drop>();
 
         #endregion
 
-        public Simulation(Land land)
+        public Simulation(double[] heights)
         {
-            if (land == null)
+            if (heights == null)
             {
-                throw new ArgumentNullException(nameof(land));
+                throw new ArgumentNullException(nameof(heights));
             }
-            Land = land;
 
-            Initialize();
+            Land = new Land(heights.Select(height => new LandRegion(height)));
+
+	        Width = Land.Regions.Count;
+	        Height = 3 * Land.Regions.Max(region => region.Height) / 2;
         }
 
         #region public methods
 
-        public Land Land { get; }
+	    public double Width { get; }
 
-        public IReadOnlyCollection<Drop> Drops
-        {
-            get { return _drops; }
-        }
+        public double Height { get; }
 
-        public double Width { get; private set; }
+	    public Land Land { get; }
 
-        public double Height { get; private set; }
-
-        public void Simulate(double time, double intensity)
+		public IReadOnlyCollection<Drop> Drops => _drops;
+		
+		public void Simulate(double time, double intensity)
         {
             foreach (Drop drop in _drops)
             {
@@ -61,45 +62,21 @@ namespace RainSimulationWpf.Rain
                 }
             }
 
-            for (int i = 0; i < Land.Regions.Count; ++i)
+            for (int regionIndex = 0; regionIndex < Land.Regions.Count; ++regionIndex)
             {
-                double excess = Land.Regions[i].Water / 2;
+	            LandRegion currentRegion = GetRegion(regionIndex);
+				LandRegion previousRegion = GetRegion(regionIndex - 1);
+	            LandRegion nextRegion = GetRegion(regionIndex + 1);
 
-                double level = GetWaterLevel(i);
-                double previousLevel = GetWaterLevel(i - 1);
-                double nextLevel = GetWaterLevel(i + 1);
+	            double flowToPrevious = GetFlow(currentRegion, previousRegion);
+	            double flowToNext = GetFlow(currentRegion, nextRegion);
 
-                if (level > previousLevel)
-                {
-                    previousLevel += excess;
-                    level -= excess;
+				currentRegion.Take(flowToPrevious + flowToNext);
+	            previousRegion.Add(flowToPrevious);
+	            nextRegion.Add(flowToNext);
+			}
 
-                    if (previousLevel > level)
-                    {
-                        double extra = (previousLevel - level) / 2;
-                        previousLevel -= extra;
-                        level += extra;
-                    }
-                }
-                if (level > nextLevel)
-                {
-                    nextLevel += excess;
-                    level -= excess;
-
-                    if (nextLevel > level)
-                    {
-                        double extra = (nextLevel - level) / 2;
-                        nextLevel -= extra;
-                        level += extra;
-                    }
-                }
-
-                SetWaterLevel(i, level);
-                SetWaterLevel(i-1, previousLevel);
-                SetWaterLevel(i+1, nextLevel);
-            }
-
-            int newDropsCount = (int) (time * intensity * _random.NextDouble());
+			int newDropsCount = (int) (time * intensity * _random.NextDouble());
             for (int i = 0; i < newDropsCount; ++i)
             {
                 double velocity = 0.005 + 0.01 * _random.NextDouble();
@@ -113,7 +90,7 @@ namespace RainSimulationWpf.Rain
                     PositionX = x,
                     PositionY = y,
                     Volume = volume,
-                    VelocityX = -0.005,
+                    //VelocityX = -0.005,
                     VelocityY = velocity
                 });
             }
@@ -122,37 +99,18 @@ namespace RainSimulationWpf.Rain
         #endregion
 
         #region private methods
+		
+	    private LandRegion GetRegion(int regionIndex)
+	    {
+		    return ((regionIndex < 0) || (regionIndex > Land.Regions.Count - 1)) 
+			    ? _outsideRegion 
+			    : Land.Regions[regionIndex];
+	    }
 
-        private void Initialize()
-        {
-            Width = Land.Regions.Count();
-            Height = 3 * Land.Regions.Max(region => region.Height) / 2;
-        }
-
-        private double GetWaterLevel(int landRegionIndex)
-        {
-            if ((landRegionIndex < 0) || (landRegionIndex > Land.Regions.Count - 1))
-            {
-                return 0;
-            }
-
-            LandRegion landRegion = Land.Regions[landRegionIndex];
-            return landRegion.Height + landRegion.Water;
-        }
-
-        private void SetWaterLevel(int landRegionIndex, double level)
-        {
-            if ((landRegionIndex < 0) || (landRegionIndex > Land.Regions.Count - 1))
-            {
-                return;
-            }
-
-            LandRegion landRegion = Land.Regions[landRegionIndex];
-            if (landRegion.Height >= 0)
-            {
-                landRegion.Water = Math.Max(0, level - landRegion.Height);
-            }
-        }
+	    private double GetFlow(LandRegion from, LandRegion to)
+	    {
+		    return 0.5 * Math.Max(0, from.GetWaterLevel() - Math.Max(to.GetWaterLevel(), from.Height));
+		}
 
         #endregion
     }

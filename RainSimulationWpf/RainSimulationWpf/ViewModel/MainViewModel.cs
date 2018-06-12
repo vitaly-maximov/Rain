@@ -1,61 +1,46 @@
+using System.Windows.Input;
+using CommonServiceLocator;
 using GalaSoft.MvvmLight;
+using GalaSoft.MvvmLight.CommandWpf;
 using RainSimulationWpf.Rain;
-using System.Threading.Tasks;
+using RainSimulationWpf.ViewModel.Services;
 
 namespace RainSimulationWpf.ViewModel
 {
     internal class MainViewModel : ViewModelBase
     {
-        #region fields
-
-        private Simulation _simulation;
-
-        #endregion
-
         public MainViewModel()
         {
-            //_simulation = new Simulation(new double[] { 5, 4, 3, 2, 1, 2, 3, 4, 5 }, new double[] { 0, 1, 2, 3, 4, 3, 2, 1, 0 });
-            //_simulation.Render(2);
-            //_simulation.Render(2);
-            //_simulation.Render(2);
-            //_simulation.Render(2);
-            //Simulation = _simulation;
+            Simulation = new Simulation(
+	            new double[] { 3, 2, 5, 8, 2, 4, 3, 9, 2, 4, 7, 3, 2, 2, 2, -1, 5, 8, 2, 4, 3, 9, 2, 4, 7 });
 
-            //Start();
-
-            Simulation = new Simulation(new Land(new[] {
-                new LandRegion(3),
-                new LandRegion(2),
-                new LandRegion(5),
-                new LandRegion(8),
-                new LandRegion(2),
-                new LandRegion(4),
-                new LandRegion(3),
-                new LandRegion(9),
-                new LandRegion(2),
-                new LandRegion(4),
-                new LandRegion(7),
-                new LandRegion(3),
-                new LandRegion(2),
-                new LandRegion(2),
-                new LandRegion(2),
-                new LandRegion(-1),
-                new LandRegion(5),
-                new LandRegion(8),
-                new LandRegion(2),
-                new LandRegion(4),
-                new LandRegion(3),
-                new LandRegion(9),
-                new LandRegion(2),
-                new LandRegion(4),
-                new LandRegion(7),
-            }));
-        }
+		    OpenMapCommand = new RelayCommand(OpenMap);
+		}
 
         #region public methods
 
-        public Simulation Simulation { get; set; }
+        public Simulation Simulation { get; private set; }
 
-        #endregion
-    }
+		public ICommand OpenMapCommand { get; }
+
+		#endregion
+
+		#region private methods
+
+	    private void OpenMap()
+	    {
+		    var fileDialogService = ServiceLocator.Current.GetInstance<IFileDialogService>();
+
+		    string filename = fileDialogService.Open();
+		    if (string.IsNullOrEmpty(filename))
+		    {
+			    return;
+		    }
+
+		    double[] map = MapReader.Read(filename);
+			Simulation = new Simulation(map);
+	    }
+
+		#endregion
+	}
 }

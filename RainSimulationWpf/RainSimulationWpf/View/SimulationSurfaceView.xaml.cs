@@ -2,6 +2,7 @@
 using RainSimulationWpf.ViewModel;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -31,16 +32,21 @@ namespace RainSimulationWpf.View
         private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             var main = (MainViewModel)DataContext;
-            Draw2(main.Simulation);
+	        Draw(main.Simulation);
+
+			if (!DesignerProperties.GetIsInDesignMode(this))
+	        {
+		        Draw2(main);
+	        }
         }
 
-        private async void Draw2(Simulation simulation)
+        private async void Draw2(MainViewModel dataContext)
         {
-            int time = 20;
-            Draw(simulation);
+            int time = 200;
+            Draw(dataContext.Simulation);
             await Task.Delay(time);
-            simulation.Simulate(time, ActualWidth / 1600);
-            Draw2(simulation);
+            dataContext.Simulation.Simulate(time, ActualWidth / 1600);
+            Draw2(dataContext);
         }
 
         private void Draw(Simulation simulation)
@@ -106,8 +112,8 @@ namespace RainSimulationWpf.View
                         width: landRegionWidth,
                         height: landRegionWaterHeight);
 
-                    context.DrawRectangle(Brushes.Blue, null, landRegionWaterRect);
-                }
+                    context.DrawRectangle(Brushes.DarkBlue, null, landRegionWaterRect);
+				}
             }
             group.Freeze();
             _surfaceImage.Source = new DrawingImage(group);
