@@ -31,26 +31,24 @@ namespace RainSimulationWpf.View
 
         private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            var main = (MainViewModel)DataContext;
-	        Draw(main.Simulation);
-
-			if (!DesignerProperties.GetIsInDesignMode(this))
+	        if (DataContext is SimulationViewModel simulation)
 	        {
-		        Draw2(main);
+		        simulation.SimulationUpdated += OnSimulationUpdated;
 	        }
         }
 
-        private async void Draw2(MainViewModel dataContext)
-        {
-            int time = 200;
-            Draw(dataContext.Simulation);
-            await Task.Delay(time);
-            dataContext.Simulation.Simulate(time, ActualWidth / 1600);
-            Draw2(dataContext);
-        }
+	    private void OnSimulationUpdated(object sender, EventArgs e)
+	    {
+		    Draw((sender as SimulationViewModel)?.Simulation);
+	    }
 
         private void Draw(Simulation simulation)
         {
+            if (_surfaceImage.Source != null)
+            {
+                return;
+            }
+
             var group = new DrawingGroup();
             using (DrawingContext context = group.Open())
             {

@@ -89,6 +89,7 @@
     <Compile Include="Rain\Simulation.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />
     <Compile Include="ViewModel\Services\IFileDialogService.cs" />
+    <Compile Include="ViewModel\SimulationViewModel.cs" />
     <Compile Include="ViewModel\ViewModelLocator.cs" />
     <Compile Include="View\Services\FileDialogService.cs" />
     <Compile Include="View\SimulationSurfaceView.xaml.cs">

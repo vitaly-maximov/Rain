@@ -40,9 +40,14 @@ namespace RainSimulationWpf.Rain
 
 		public IReadOnlyCollection<Drop> Drops => _drops;
 		
-		public void Simulate(double time, double intensity)
+		public void Simulate(double time, double intensity, bool isRainy, double incline)
         {
-            foreach (Drop drop in _drops)
+	        foreach (Drop drop in _drops)
+	        {
+		        drop.VelocityX = incline * 0.005;
+	        }
+
+			foreach (Drop drop in _drops)
             {
                 drop.PositionX += drop.VelocityX * time;
                 drop.PositionY -= drop.VelocityY * time;
@@ -76,24 +81,27 @@ namespace RainSimulationWpf.Rain
 	            nextRegion.Add(flowToNext);
 			}
 
-			int newDropsCount = (int) (time * intensity * _random.NextDouble());
-            for (int i = 0; i < newDropsCount; ++i)
-            {
-                double velocity = 0.005 + 0.01 * _random.NextDouble();
-                double volume = 1 + _random.NextDouble();
+			if (isRainy)
+			{ 
+				int newDropsCount = (int) (time * intensity * _random.NextDouble());
+				for (int i = 0; i < newDropsCount; ++i)
+				{
+					double velocity = 0.005 + 0.01 * _random.NextDouble();
+					double volume = 1 + _random.NextDouble();
 
-                double x = Width * _random.NextDouble();
-                double y = Height - velocity * time * _random.NextDouble();
+					double x = Width * _random.NextDouble();
+					double y = Height - velocity * time * _random.NextDouble();
 
-                _drops.Add(new Drop
-                {
-                    PositionX = x,
-                    PositionY = y,
-                    Volume = volume,
-                    //VelocityX = -0.005,
-                    VelocityY = velocity
-                });
-            }
+					_drops.Add(new Drop
+					{
+						PositionX = x,
+						PositionY = y,
+						Volume = volume,
+						VelocityX = incline * 0.005,
+						VelocityY = velocity
+					});
+				}
+				}
         }
 
         #endregion

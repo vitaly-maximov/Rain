@@ -10,6 +10,11 @@
 
     <Window.InputBindings>
         <KeyBinding Key="O" Modifiers="Control" Command="{Binding OpenMapCommand, Mode=OneTime}" />
+        <KeyBinding Key="Space" Command="{Binding ToggleRainCommand, Mode=OneTime}" />
+        <KeyBinding Key="OemPlus" Command="{Binding IncreaseRainCommand, Mode=OneTime}" />
+        <KeyBinding Key="OemMinus" Command="{Binding DecreaseRainCommand, Mode=OneTime}" />
+        <KeyBinding Key="Left" Command="{Binding InclineLeftRainCommand, Mode=OneTime}" />
+        <KeyBinding Key="Right" Command="{Binding InclineRightRainCommand, Mode=OneTime}" />
     </Window.InputBindings>
 
     <DockPanel>
@@ -18,11 +23,45 @@
                 <MenuItem 
                     Header="_Open" 
                     InputGestureText="Ctrl+O"
-                    Command="{Binding OpenMapCommand, Mode=OneTime}">
+                    Command="{Binding OpenMapCommand, Mode=OneTime}" />
+            </MenuItem>
+
+            <MenuItem Header="_Rain">
+                <MenuItem 
+                    InputGestureText="Space"
+                    Command="{Binding ToggleRainCommand, Mode=OneTime}">
+                    <MenuItem.Style>
+                        <Style TargetType="MenuItem">
+                            <Setter Property="Header" Value="_Start" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Simulation.IsRainy, Mode=OneWay}" Value="True">
+                                    <Setter Property="Header" Value="_Stop" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </MenuItem.Style>
                 </MenuItem>
+
+                <MenuItem 
+                    Header="Increase"
+                    InputGestureText="+"
+                    Command="{Binding IncreaseRainCommand, Mode=OneTime}" />
+
+                <MenuItem 
+                    Header="Decrease"
+                    InputGestureText="-"
+                    Command="{Binding DecreaseRainCommand, Mode=OneTime}" />
+
+                <MenuItem 
+                    Header="Left"
+                    Command="{Binding InclineLeftRainCommand, Mode=OneTime}" />
+
+                <MenuItem 
+                    Header="Right"
+                    Command="{Binding InclineRightRainCommand, Mode=OneTime}" />
             </MenuItem>
         </Menu>
 
-        <local:SimulationSurfaceView />
+        <local:SimulationSurfaceView DataContext="{Binding Simulation, Mode=OneTime}"/>
     </DockPanel>
 </Window>
